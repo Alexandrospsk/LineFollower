@@ -71,3 +71,6 @@ while True:
         else:
             motor1.throttle=speed
             motor2.throttle=0
+            
+            
+            
