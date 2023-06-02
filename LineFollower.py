@@ -1,26 +1,11 @@
 import board
 import simpleio
-import digitalio
+
 import time
 import pwmio
-from adafruit_motor import servo, motor
-from adafruit_debouncer import Debouncer
+from adafruit_motor import  motor
 
-
-
-Start_Button = digitalio.DigitalInOut(board.GP20)
-Start_Button.direction = digitalio.Direction.INPUT
-Start_Button.pull = digitalio.Pull.UP
-
-Speed_Button = digitalio.DigitalInOut(board.GP21)
-Speed_Button.direction = digitalio.Direction.INPUT
-Speed_Button.pull = digitalio.Pull.UP
-
-Speed_Switch = Debouncer(Speed_Button)
-Start_Switch = Debouncer(Start_Button)
-
-speed=0
-start=0
+time.sleep(2)
 
 sensorA = simpleio.DigitalIn(board.GP0)
 sensorB = simpleio.DigitalIn(board.GP7)
@@ -33,44 +18,32 @@ motor2_A = pwmio.PWMOut(board.GP10, frequency=50)
 motor2_B = pwmio.PWMOut(board.GP11, frequency=50)
 motor2= motor.DCMotor(motor2_A,motor2_B)
 
-
-
+def Motors(M1=0,M2=0):
+    motor1.throttle = M1
+    motor2.throttle = M2
+    
+speed=0.7
+Motors(1,1)
 while True:
-    Speed_Switch.update()
-    Start_Switch.update()
-    sensor1 = sensorA.value
-    sensor2 = sensorB.value
+    L_sensor = sensorA.value
+    R_sensor = sensorB.value
+    #optimal speed 0.55
     #zero is seeing white
-    
-    if Start_Switch.fell:
-        start=1-start
-    
-    if Speed_Switch.fell and start == 1:
-        if speed != 1:
-            speed=speed+0.25
+    if L_sensor == 0 and R_sensor == 0 :
+        Motors(speed,speed)
+    if L_sensor == 0 and R_sensor == 1 :
+        if L_sensor ==1:
+            Motors(0,0)
+            break
         else:
-            speed=0.25
-    if start == 0:
-        speed=0
-        
-        
-    if sensor1 == 0:
-        if sensor2 == 0:
-            motor1.throttle=speed
-            motor2.throttle=speed
-            
-        elif sensor2 == 1:
-            motor1.throttle=0
-            motor2.throttle=speed
-            
-    elif sensor1 == 1:
-        if sensor2 == 1:
-            motor1.throttle=0
-            motor2.throttle=0
-            
+            Motors(-(speed+0.25),speed+0.25)
+    if L_sensor == 1 and R_sensor == 0 :
+        if R_sensor == 1 :
+            Motors(0,0)
+            break
         else:
-            motor1.throttle=speed
-            motor2.throttle=0
-            
-            
+            Motors(speed,-speed)
+    if L_sensor == 1 and R_sensor == 1 :
+        Motors(0,0)
+        break   
             
